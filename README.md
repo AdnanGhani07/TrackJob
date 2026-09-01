@@ -60,7 +60,7 @@ flowchart TD
     end
     
     subgraph AI[AI Providers]
-        Gemini[Google Gemini 3.7 Flash]
+        Gemini[Google Gemini 3.5 Flash Lite]
         Ollama[Local Ollama llama3.2]
     end
 
