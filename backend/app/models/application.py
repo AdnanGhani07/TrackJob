@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime, date, timezone
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 from sqlalchemy import (
     String,
     Text,
