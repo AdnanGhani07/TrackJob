@@ -1,12 +1,11 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
+from app.deps import get_current_user, get_db
 from app.models.company import Company
-from app.schemas.company import CompanyCreate, CompanyUpdate, CompanyResponse
+from app.models.user import User
+from app.schemas.company import CompanyCreate, CompanyResponse, CompanyUpdate
 
 router = APIRouter(prefix="/companies", tags=["Companies"])
 
@@ -39,7 +38,7 @@ def create_company(
     return company
 
 
-@router.get("", response_model=List[CompanyResponse])
+@router.get("", response_model=list[CompanyResponse])
 def list_companies(
     skip: int = 0,
     limit: int = 100,
@@ -124,4 +123,3 @@ def delete_company(
 
     db.delete(company)
     db.commit()
-    return None

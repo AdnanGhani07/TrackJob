@@ -1,22 +1,25 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
+from app.deps import get_current_user, get_db
 from app.models.application import Application
 from app.models.interview_round import InterviewRound
+from app.models.user import User
 from app.schemas.interview_round import (
     InterviewRoundCreate,
-    InterviewRoundUpdate,
     InterviewRoundResponse,
+    InterviewRoundUpdate,
 )
 
 router = APIRouter(tags=["Interview Rounds"])
 
 
-@router.post("/applications/{application_id}/interview-rounds", response_model=InterviewRoundResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/applications/{application_id}/interview-rounds",
+    response_model=InterviewRoundResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_interview_round_for_application(
     application_id: int,
     round_in: InterviewRoundCreate,
@@ -44,7 +47,10 @@ def create_interview_round_for_application(
     return round_entry
 
 
-@router.get("/applications/{application_id}/interview-rounds", response_model=List[InterviewRoundResponse])
+@router.get(
+    "/applications/{application_id}/interview-rounds",
+    response_model=list[InterviewRoundResponse],
+)
 def list_interview_rounds_for_application(
     application_id: int,
     db: Session = Depends(get_db),
@@ -58,7 +64,11 @@ def list_interview_rounds_for_application(
             detail=f"Application with ID {application_id} not found.",
         )
 
-    stmt = select(InterviewRound).where(InterviewRound.application_id == application_id).order_by(InterviewRound.scheduled_date.asc())
+    stmt = (
+        select(InterviewRound)
+        .where(InterviewRound.application_id == application_id)
+        .order_by(InterviewRound.scheduled_date.asc())
+    )
     return db.scalars(stmt).all()
 
 
@@ -102,4 +112,3 @@ def delete_interview_round(
 
     db.delete(round_entry)
     db.commit()
-    return None

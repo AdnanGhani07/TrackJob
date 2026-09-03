@@ -1,5 +1,5 @@
-from datetime import datetime, date
-from typing import Optional, List
+from datetime import date, datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.contact import ContactRelation
@@ -8,8 +8,8 @@ from app.models.contact import ContactRelation
 class ContactBase(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     relation: ContactRelation = ContactRelation.REFERRER
-    linkedin_url: Optional[str] = Field(default=None, max_length=500)
-    last_contacted_date: Optional[date] = None
+    linkedin_url: str | None = Field(default=None, max_length=500)
+    last_contacted_date: date | None = None
 
 
 class ContactCreate(ContactBase):
@@ -17,10 +17,10 @@ class ContactCreate(ContactBase):
 
 
 class ContactUpdate(BaseModel):
-    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
-    relation: Optional[ContactRelation] = None
-    linkedin_url: Optional[str] = Field(default=None, max_length=500)
-    last_contacted_date: Optional[date] = None
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    relation: ContactRelation | None = None
+    linkedin_url: str | None = Field(default=None, max_length=500)
+    last_contacted_date: date | None = None
 
 
 class ContactResponse(ContactBase):

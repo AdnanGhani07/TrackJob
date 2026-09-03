@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -13,7 +14,7 @@ def auth_headers():
     password = "TestPassword123!"
     reg_res = client.post("/auth/register", json={"email": email, "password": password})
     assert reg_res.status_code == 201
-    
+
     login_res = client.post("/auth/login", json={"email": email, "password": password})
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
@@ -35,7 +36,11 @@ def test_companies_crud(auth_headers):
     # 1. Create company
     create_res = client.post(
         "/companies",
-        json={"name": company_name, "industry": "FinTech", "notes": "Target for backend role"},
+        json={
+            "name": company_name,
+            "industry": "FinTech",
+            "notes": "Target for backend role",
+        },
         headers=auth_headers,
     )
     assert create_res.status_code == 201
@@ -44,7 +49,9 @@ def test_companies_crud(auth_headers):
     assert company_data["name"] == company_name
 
     # 2. Duplicate company check (should fail with 400)
-    dup_res = client.post("/companies", json={"name": company_name}, headers=auth_headers)
+    dup_res = client.post(
+        "/companies", json={"name": company_name}, headers=auth_headers
+    )
     assert dup_res.status_code == 400
 
     # 3. List companies

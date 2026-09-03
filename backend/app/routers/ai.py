@@ -1,18 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
-from app.models.application import Application
+from app.deps import get_current_user, get_db
 from app.models.ai_prep_note import AIPrepNote
+from app.models.application import Application
+from app.models.user import User
 from app.schemas.ai import AIPrepNotesResponse, GenerateAIPrepRequest
 from app.services.ai_service import AIService
 
-router = APIRouter(prefix="/applications/{application_id}/ai", tags=["AI Interview Prep"])
+router = APIRouter(
+    prefix="/applications/{application_id}/ai", tags=["AI Interview Prep"]
+)
 
 
-@router.post("/prep-notes", response_model=AIPrepNotesResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/prep-notes",
+    response_model=AIPrepNotesResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def generate_or_refresh_prep_notes(
     application_id: int,
     request: GenerateAIPrepRequest = GenerateAIPrepRequest(),
@@ -42,7 +48,9 @@ async def generate_or_refresh_prep_notes(
         )
 
     # 2. Check existing prep notes if force_refresh is False
-    existing_stmt = select(AIPrepNote).where(AIPrepNote.application_id == application_id)
+    existing_stmt = select(AIPrepNote).where(
+        AIPrepNote.application_id == application_id
+    )
     existing_note = db.scalars(existing_stmt).first()
 
     if existing_note and not request.force_refresh:
@@ -139,4 +147,3 @@ def delete_prep_notes(
     if prep_note:
         db.delete(prep_note)
         db.commit()
-    return None

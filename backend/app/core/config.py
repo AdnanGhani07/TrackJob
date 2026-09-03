@@ -1,4 +1,3 @@
-from typing import List, Union
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,7 +13,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "interview_tracker"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/interview_tracker"
+    DATABASE_URL: str = (
+        "postgresql://postgres:postgres@localhost:5432/interview_tracker"
+    )
 
     # Security
     SECRET_KEY: str = "dev_secret_key_interview_tracker_super_secure_hash_2026_x9"
@@ -28,11 +29,14 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3.2:3b"
 
     # CORS
-    ALLOWED_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    ALLOWED_ORIGINS: list[str] | str = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+    def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):

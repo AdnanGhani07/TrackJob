@@ -1,10 +1,13 @@
 import enum
 from datetime import datetime, timezone
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
-    Text,
     DateTime,
     ForeignKey,
+    Text,
+)
+from sqlalchemy import (
     Enum as SQLEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -44,14 +47,16 @@ class InterviewRound(Base):
         nullable=False,
     )
     scheduled_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     outcome: Mapped[RoundOutcome] = mapped_column(
         SQLEnum(RoundOutcome, name="round_outcome_enum", native_enum=False),
         default=RoundOutcome.PENDING,
         nullable=False,
     )
-    
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -60,7 +65,9 @@ class InterviewRound(Base):
     )
 
     # Relationships
-    application: Mapped["Application"] = relationship("Application", back_populates="interview_rounds")
+    application: Mapped["Application"] = relationship(
+        "Application", back_populates="interview_rounds"
+    )
 
     def __repr__(self) -> str:
         return f"<InterviewRound id={self.id} type={self.round_type} outcome={self.outcome}>"

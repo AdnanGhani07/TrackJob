@@ -2,7 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, companies, applications, contacts, outreach, interview_rounds, ai
+from app.routers import (
+    ai,
+    applications,
+    auth,
+    companies,
+    contacts,
+    interview_rounds,
+    outreach,
+)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

@@ -1,23 +1,24 @@
-from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, joinedload
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
+from app.deps import get_current_user, get_db
+from app.models.application import Application, ApplicationSource, ApplicationStatus
 from app.models.company import Company
-from app.models.application import Application, ApplicationStatus, ApplicationSource
+from app.models.user import User
 from app.schemas.application import (
     ApplicationCreate,
-    ApplicationUpdate,
     ApplicationResponse,
+    ApplicationUpdate,
 )
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
 
-@router.post("", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED
+)
 def create_application(
     app_in: ApplicationCreate,
     db: Session = Depends(get_db),
@@ -77,11 +78,13 @@ def create_application(
     )
 
 
-@router.get("", response_model=List[ApplicationResponse])
+@router.get("", response_model=list[ApplicationResponse])
 def list_applications(
-    status: Optional[ApplicationStatus] = Query(None, description="Filter by application status"),
-    source: Optional[ApplicationSource] = Query(None, description="Filter by source"),
-    company_id: Optional[int] = Query(None, description="Filter by company ID"),
+    status: ApplicationStatus | None = Query(
+        None, description="Filter by application status"
+    ),
+    source: ApplicationSource | None = Query(None, description="Filter by source"),
+    company_id: int | None = Query(None, description="Filter by company ID"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -198,4 +201,3 @@ def delete_application(
 
     db.delete(application)
     db.commit()
-    return None

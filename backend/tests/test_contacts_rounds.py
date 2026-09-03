@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -13,7 +14,7 @@ def auth_headers():
     password = "TestPassword123!"
     reg_res = client.post("/auth/register", json={"email": email, "password": password})
     assert reg_res.status_code == 201
-    
+
     login_res = client.post("/auth/login", json={"email": email, "password": password})
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
@@ -23,7 +24,9 @@ def auth_headers():
 def test_contacts_and_outreach_flow(auth_headers):
     uid = uuid.uuid4().hex[:6]
     # 1. Create company and application
-    comp_res = client.post("/companies", json={"name": f"Meta_{uid}"}, headers=auth_headers)
+    comp_res = client.post(
+        "/companies", json={"name": f"Meta_{uid}"}, headers=auth_headers
+    )
     assert comp_res.status_code == 201
     comp_id = comp_res.json()["id"]
 
@@ -84,7 +87,9 @@ def test_contacts_and_outreach_flow(auth_headers):
 
 def test_interview_rounds_flow(auth_headers):
     uid = uuid.uuid4().hex[:6]
-    comp_res = client.post("/companies", json={"name": f"Amazon_{uid}"}, headers=auth_headers)
+    comp_res = client.post(
+        "/companies", json={"name": f"Amazon_{uid}"}, headers=auth_headers
+    )
     comp_id = comp_res.json()["id"]
 
     app_res = client.post(
@@ -121,6 +126,8 @@ def test_interview_rounds_flow(auth_headers):
     assert patch_res.json()["outcome"] == "passed"
 
     # 3. List Interview Rounds
-    rounds_res = client.get(f"/applications/{app_id}/interview-rounds", headers=auth_headers)
+    rounds_res = client.get(
+        f"/applications/{app_id}/interview-rounds", headers=auth_headers
+    )
     assert rounds_res.status_code == 200
     assert len(rounds_res.json()) == 1

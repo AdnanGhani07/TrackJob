@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
@@ -8,8 +7,8 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    sub: Optional[str] = None
-    exp: Optional[int] = None
+    sub: str | None = None
+    exp: int | None = None
 
 
 class LoginRequest(BaseModel):

@@ -1,11 +1,11 @@
-from datetime import datetime, date
-from typing import Optional
+from datetime import date, datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class OutreachLogBase(BaseModel):
     message_sent: str = Field(min_length=1)
-    date_sent: Optional[date] = None
+    date_sent: date | None = None
     response_received: bool = False
 
 
@@ -14,9 +14,9 @@ class OutreachLogCreate(OutreachLogBase):
 
 
 class OutreachLogUpdate(BaseModel):
-    message_sent: Optional[str] = Field(default=None, min_length=1)
-    date_sent: Optional[date] = None
-    response_received: Optional[bool] = None
+    message_sent: str | None = Field(default=None, min_length=1)
+    date_sent: date | None = None
+    response_received: bool | None = None
 
 
 class OutreachLogResponse(OutreachLogBase):

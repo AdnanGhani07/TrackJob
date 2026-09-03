@@ -1,4 +1,5 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -12,12 +13,14 @@ class Company(Base):
     __tablename__ = "companies"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    industry: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
+    )
+    industry: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
-    applications: Mapped[List["Application"]] = relationship(
+    applications: Mapped[list["Application"]] = relationship(
         "Application",
         back_populates="company",
         cascade="all, delete-orphan",

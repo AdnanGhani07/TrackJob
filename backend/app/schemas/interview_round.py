@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.interview_round import RoundType, RoundOutcome
+from pydantic import BaseModel, ConfigDict
+
+from app.models.interview_round import RoundOutcome, RoundType
 
 
 class InterviewRoundBase(BaseModel):
     round_type: RoundType = RoundType.PHONE_SCREEN
     scheduled_date: datetime
-    notes: Optional[str] = None
+    notes: str | None = None
     outcome: RoundOutcome = RoundOutcome.PENDING
 
 
@@ -17,10 +17,10 @@ class InterviewRoundCreate(InterviewRoundBase):
 
 
 class InterviewRoundUpdate(BaseModel):
-    round_type: Optional[RoundType] = None
-    scheduled_date: Optional[datetime] = None
-    notes: Optional[str] = None
-    outcome: Optional[RoundOutcome] = None
+    round_type: RoundType | None = None
+    scheduled_date: datetime | None = None
+    notes: str | None = None
+    outcome: RoundOutcome | None = None
 
 
 class InterviewRoundResponse(InterviewRoundBase):

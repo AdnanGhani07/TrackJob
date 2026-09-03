@@ -1,19 +1,27 @@
 from datetime import date
-from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
+from app.deps import get_current_user, get_db
 from app.models.contact import Contact
 from app.models.outreach_log import OutreachLog
-from app.schemas.outreach import OutreachLogCreate, OutreachLogUpdate, OutreachLogResponse
+from app.models.user import User
+from app.schemas.outreach import (
+    OutreachLogCreate,
+    OutreachLogResponse,
+    OutreachLogUpdate,
+)
 
 router = APIRouter(tags=["Outreach"])
 
 
-@router.post("/contacts/{contact_id}/outreach", response_model=OutreachLogResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/contacts/{contact_id}/outreach",
+    response_model=OutreachLogResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_outreach_log_for_contact(
     contact_id: int,
     outreach_in: OutreachLogCreate,
@@ -40,7 +48,7 @@ def create_outreach_log_for_contact(
     return outreach
 
 
-@router.get("/contacts/{contact_id}/outreach", response_model=List[OutreachLogResponse])
+@router.get("/contacts/{contact_id}/outreach", response_model=list[OutreachLogResponse])
 def list_outreach_for_contact(
     contact_id: int,
     db: Session = Depends(get_db),
@@ -54,7 +62,11 @@ def list_outreach_for_contact(
             detail=f"Contact with ID {contact_id} not found.",
         )
 
-    stmt = select(OutreachLog).where(OutreachLog.contact_id == contact_id).order_by(OutreachLog.date_sent.desc())
+    stmt = (
+        select(OutreachLog)
+        .where(OutreachLog.contact_id == contact_id)
+        .order_by(OutreachLog.date_sent.desc())
+    )
     return db.scalars(stmt).all()
 
 
@@ -98,4 +110,3 @@ def delete_outreach_log(
 
     db.delete(outreach)
     db.commit()
-    return None

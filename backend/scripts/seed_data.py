@@ -5,32 +5,34 @@ Usage:
     python scripts/seed_data.py --force-production (if running against staging/production database)
 """
 
-import sys
 import os
-from datetime import datetime, date, timedelta, timezone
+import sys
+from datetime import date, datetime, timedelta, timezone
 
 # Add backend dir to sys.path so app modules import properly
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.core.db import SessionLocal
 from app.core.config import settings
+from app.core.db import SessionLocal
 from app.core.security import get_password_hash
-from app.models.user import User
-from app.models.company import Company
-from app.models.application import Application, ApplicationStatus, ApplicationSource
-from app.models.contact import Contact, ContactRelation
-from app.models.outreach_log import OutreachLog
-from app.models.interview_round import InterviewRound, RoundType, RoundOutcome
 from app.models.ai_prep_note import AIPrepNote
+from app.models.application import Application, ApplicationSource, ApplicationStatus
+from app.models.company import Company
+from app.models.contact import Contact, ContactRelation
+from app.models.interview_round import InterviewRound, RoundOutcome, RoundType
+from app.models.outreach_log import OutreachLog
+from app.models.user import User
 
 
 def seed_database():
     is_prod = settings.ENVIRONMENT.lower() in ["production", "prod"]
     if is_prod and "--force-production" not in sys.argv:
-        print("[!] SAFETY ABORT: Refusing to run seed script in PRODUCTION environment without --force-production flag.")
+        print(
+            "[!] SAFETY ABORT: Refusing to run seed script in PRODUCTION environment without --force-production flag."
+        )
         return
 
     print("[*] Initializing Database Seeder...")
@@ -54,11 +56,31 @@ def seed_database():
 
         # 2. Seed Companies
         companies_data = [
-            {"name": "Stripe", "industry": "Financial Technology", "notes": "Global infrastructure for internet commerce."},
-            {"name": "Datadog", "industry": "Cloud Observability & Security", "notes": "Monitoring platform for cloud-scale applications."},
-            {"name": "Google", "industry": "Search & Cloud", "notes": "Core Infrastructure and Distributed Systems teams."},
-            {"name": "OpenAI", "industry": "Artificial Intelligence", "notes": "Applied AI and Research Infrastructure."},
-            {"name": "Meta", "industry": "Social Media & Metaverse", "notes": "Monetization and ads infra engineering."},
+            {
+                "name": "Stripe",
+                "industry": "Financial Technology",
+                "notes": "Global infrastructure for internet commerce.",
+            },
+            {
+                "name": "Datadog",
+                "industry": "Cloud Observability & Security",
+                "notes": "Monitoring platform for cloud-scale applications.",
+            },
+            {
+                "name": "Google",
+                "industry": "Search & Cloud",
+                "notes": "Core Infrastructure and Distributed Systems teams.",
+            },
+            {
+                "name": "OpenAI",
+                "industry": "Artificial Intelligence",
+                "notes": "Applied AI and Research Infrastructure.",
+            },
+            {
+                "name": "Meta",
+                "industry": "Social Media & Metaverse",
+                "notes": "Monetization and ads infra engineering.",
+            },
         ]
 
         created_companies = {}
@@ -158,7 +180,9 @@ Seeking engineers with deep experience in Linux namespaces, container runtimes, 
 
         # 4. Seed Contacts & Outreach Logs
         stripe_app = created_apps["Stripe"]
-        contact1 = db.scalars(select(Contact).where(Contact.application_id == stripe_app.id)).first()
+        contact1 = db.scalars(
+            select(Contact).where(Contact.application_id == stripe_app.id)
+        ).first()
         if not contact1:
             contact1 = Contact(
                 application_id=stripe_app.id,
@@ -183,7 +207,9 @@ Seeking engineers with deep experience in Linux namespaces, container runtimes, 
 
         # 5. Seed Interview Rounds for Google
         google_app = created_apps["Google"]
-        existing_rounds = db.scalars(select(InterviewRound).where(InterviewRound.application_id == google_app.id)).all()
+        existing_rounds = db.scalars(
+            select(InterviewRound).where(InterviewRound.application_id == google_app.id)
+        ).all()
         if not existing_rounds:
             r1 = InterviewRound(
                 application_id=google_app.id,
@@ -211,7 +237,9 @@ Seeking engineers with deep experience in Linux namespaces, container runtimes, 
             print("[+] Seeded Interview Rounds for Google.")
 
         # 6. Seed AI Prep Notes for Stripe
-        existing_ai = db.scalars(select(AIPrepNote).where(AIPrepNote.application_id == stripe_app.id)).first()
+        existing_ai = db.scalars(
+            select(AIPrepNote).where(AIPrepNote.application_id == stripe_app.id)
+        ).first()
         if not existing_ai:
             ai_note = AIPrepNote(
                 application_id=stripe_app.id,

@@ -1,25 +1,25 @@
 from datetime import datetime
-from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
 class PrepQuestionItem(BaseModel):
     question: str
     category: str = "Technical"
-    tips: Optional[str] = None
-    answer: Optional[str] = None
-    explanation: Optional[str] = None
-    sample_code: Optional[str] = None
+    tips: str | None = None
+    answer: str | None = None
+    explanation: str | None = None
+    sample_code: str | None = None
 
 
 class PrepBulletItem(BaseModel):
     bullet: str
-    keyword_match: Optional[str] = None
+    keyword_match: str | None = None
 
 
 class AIPrepNotesBase(BaseModel):
-    generated_questions: List[PrepQuestionItem]
-    suggested_bullets: List[PrepBulletItem]
+    generated_questions: list[PrepQuestionItem]
+    suggested_bullets: list[PrepBulletItem]
     model_used: str
 
 
@@ -32,7 +32,7 @@ class AIPrepNotesResponse(AIPrepNotesBase):
 
 
 class GenerateAIPrepRequest(BaseModel):
-    custom_instructions: Optional[str] = None
-    round_type: Optional[str] = None
-    round_notes: Optional[str] = None
+    custom_instructions: str | None = None
+    round_type: str | None = None
+    round_notes: str | None = None
     force_refresh: bool = False

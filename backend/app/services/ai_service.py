@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
+
 import httpx
 
 from app.core.config import settings
@@ -53,10 +54,10 @@ class AIService:
         role_title: str,
         company_name: str,
         jd_text: str,
-        round_type: Optional[str] = None,
-        round_notes: Optional[str] = None,
-        custom_instructions: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        round_type: str | None = None,
+        round_notes: str | None = None,
+        custom_instructions: str | None = None,
+    ) -> dict[str, Any]:
         """
         Generates structured interview questions and resume bullets using Google Gemini 3.7 Flash
         or falls back to local Ollama if no Gemini API key is configured.
@@ -89,30 +90,29 @@ Job Description:
             try:
                 return await cls._generate_with_gemini(user_prompt)
             except Exception as e:
-                logger.warning(f"Gemini generation failed: {e}. Attempting Ollama fallback...")
+                logger.warning(
+                    f"Gemini generation failed: {e}. Attempting Ollama fallback..."
+                )
 
         # 2. Fallback to Local Ollama
         return await cls._generate_with_ollama(user_prompt)
 
     @classmethod
-    async def _generate_with_gemini(cls, user_prompt: str) -> Dict[str, Any]:
+    async def _generate_with_gemini(cls, user_prompt: str) -> dict[str, Any]:
         """Calls Google Gemini Generative Language API directly via async HTTP with structured JSON output."""
         model_name = settings.GEMINI_MODEL or "gemini-2.5-flash"
         # Standardize model identifier
-        clean_model = model_name if not model_name.startswith("models/") else model_name.replace("models/", "")
-        
+        clean_model = (
+            model_name
+            if not model_name.startswith("models/")
+            else model_name.replace("models/", "")
+        )
+
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{clean_model}:generateContent?key={settings.GEMINI_API_KEY}"
-        
+
         payload = {
-            "system_instruction": {
-                "parts": [{"text": PREP_SYSTEM_PROMPT}]
-            },
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": user_prompt}]
-                }
-            ],
+            "system_instruction": {"parts": [{"text": PREP_SYSTEM_PROMPT}]},
+            "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
             "generationConfig": {
                 "response_mime_type": "application/json",
                 "temperature": 0.4,
@@ -122,22 +122,21 @@ Job Description:
         async with httpx.AsyncClient(timeout=60.0) as client:
             resp = await client.post(url, json=payload)
             if resp.status_code != 200:
-                raise RuntimeError(f"Gemini API returned status {resp.status_code}: {resp.text}")
-            
+                raise RuntimeError(
+                    f"Gemini API returned status {resp.status_code}: {resp.text}"
+                )
+
             data = resp.json()
             candidates = data.get("candidates", [])
             if not candidates:
                 raise RuntimeError("Gemini API returned empty candidates.")
-            
+
             text = candidates[0]["content"]["parts"][0]["text"].strip()
-            
+
             # Clean possible markdown wrapping
-            if text.startswith("```json"):
-                text = text[7:]
-            if text.startswith("```"):
-                text = text[3:]
-            if text.endswith("```"):
-                text = text[:-3]
+            text = text.removeprefix("```json")
+            text = text.removeprefix("```")
+            text = text.removesuffix("```")
             text = text.strip()
 
             try:
@@ -153,7 +152,7 @@ Job Description:
             }
 
     @classmethod
-    async def _generate_with_ollama(cls, user_prompt: str) -> Dict[str, Any]:
+    async def _generate_with_ollama(cls, user_prompt: str) -> dict[str, Any]:
         """Calls local Ollama daemon with JSON format constraint."""
         url = f"{settings.OLLAMA_BASE_URL.rstrip('/')}/api/generate"
         payload = {
@@ -171,8 +170,10 @@ Job Description:
             async with httpx.AsyncClient(timeout=120.0) as client:
                 resp = await client.post(url, json=payload)
                 if resp.status_code != 200:
-                    raise RuntimeError(f"Ollama returned status {resp.status_code}: {resp.text}")
-                
+                    raise RuntimeError(
+                        f"Ollama returned status {resp.status_code}: {resp.text}"
+                    )
+
                 result = resp.json()
                 raw_response = result.get("response", "{}")
                 parsed = json.loads(raw_response)
@@ -188,4 +189,4 @@ Job Description:
                 "Please add a GEMINI_API_KEY to your .env or start Ollama at http://localhost:11434."
             )
         except Exception as e:
-            raise RuntimeError(f"AI Generation failed: {str(e)}")
+            raise RuntimeError(f"AI Generation failed: {e!s}")

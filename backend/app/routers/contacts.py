@@ -1,18 +1,21 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.deps import get_db, get_current_user
-from app.models.user import User
+from app.deps import get_current_user, get_db
 from app.models.application import Application
 from app.models.contact import Contact
-from app.schemas.contact import ContactCreate, ContactUpdate, ContactResponse
+from app.models.user import User
+from app.schemas.contact import ContactCreate, ContactResponse, ContactUpdate
 
 router = APIRouter(tags=["Contacts"])
 
 
-@router.post("/applications/{application_id}/contacts", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/applications/{application_id}/contacts",
+    response_model=ContactResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_contact_for_application(
     application_id: int,
     contact_in: ContactCreate,
@@ -40,7 +43,9 @@ def create_contact_for_application(
     return contact
 
 
-@router.get("/applications/{application_id}/contacts", response_model=List[ContactResponse])
+@router.get(
+    "/applications/{application_id}/contacts", response_model=list[ContactResponse]
+)
 def list_contacts_for_application(
     application_id: int,
     db: Session = Depends(get_db),
@@ -54,7 +59,11 @@ def list_contacts_for_application(
             detail=f"Application with ID {application_id} not found.",
         )
 
-    stmt = select(Contact).where(Contact.application_id == application_id).order_by(Contact.created_at.desc())
+    stmt = (
+        select(Contact)
+        .where(Contact.application_id == application_id)
+        .order_by(Contact.created_at.desc())
+    )
     return db.scalars(stmt).all()
 
 
@@ -98,4 +107,3 @@ def delete_contact(
 
     db.delete(contact)
     db.commit()
-    return None

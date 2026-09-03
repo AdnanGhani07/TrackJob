@@ -1,11 +1,14 @@
 import enum
-from datetime import datetime, date, timezone
-from typing import List, Optional, TYPE_CHECKING
+from datetime import date, datetime, timezone
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
-    String,
     Date,
     DateTime,
     ForeignKey,
+    String,
+)
+from sqlalchemy import (
     Enum as SQLEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -39,13 +42,17 @@ class Contact(Base):
         default=ContactRelation.REFERRER,
         nullable=False,
     )
-    linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    last_contacted_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    linkedin_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    last_contacted_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     # Relationships
-    application: Mapped["Application"] = relationship("Application", back_populates="contacts")
-    outreach_logs: Mapped[List["OutreachLog"]] = relationship(
+    application: Mapped["Application"] = relationship(
+        "Application", back_populates="contacts"
+    )
+    outreach_logs: Mapped[list["OutreachLog"]] = relationship(
         "OutreachLog",
         back_populates="contact",
         cascade="all, delete-orphan",
